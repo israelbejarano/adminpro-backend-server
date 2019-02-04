@@ -41,7 +41,7 @@ app.post('/', (req, res) => {
 
     usuario.save((err, usuarioGuardado) => { // moongose
         if (err) {
-            return res.status(500).json({
+            return res.status(400).json({
                 ok: false,
                 mensaje: 'Error guardando usuario en BBDD',
                 errors: err
