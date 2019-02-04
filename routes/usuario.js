@@ -3,6 +3,9 @@ var app = express();
 
 var Usuario = require('../models/usuario');
 
+// ========================================
+// obtener todos los usuarios
+// ========================================
 app.get('/', (req, res, next) => {
 
     // Usuario.find({}, (err, usuarios) => {    // devuelve todo el objeto usuario sin mas
@@ -18,6 +21,35 @@ app.get('/', (req, res, next) => {
         res.status(200).json({
             ok: true,
             usuarios: usuarios //segun EM6 esto es redundante y se puede hacer solo usuarios, pero asi queda mas claro
+        });
+    });
+});
+
+// ========================================
+// crear un nuevo usuario
+// ========================================
+app.post('/', (req, res) => {
+    var body = req.body;
+    // declaro el usuario a guardar con los datos que trae el body que son los datos del usuario
+    var usuario = new Usuario({
+        nombre: body.nombre,
+        email: body.email,
+        password: body.password,
+        img: body.img,
+        role: body.role
+    });
+
+    usuario.save((err, usuarioGuardado) => { // moongose
+        if (err) {
+            return res.status(500).json({
+                ok: false,
+                mensaje: 'Error guardando usuario en BBDD',
+                errors: err
+            });
+        }
+        res.status(201).json({
+            ok: true,
+            usuario: usuarioGuardado
         });
     });
 });
