@@ -56,7 +56,44 @@ app.post('/', (req, res) => {
 });
 
 // ========================================
-// Actualizar un nuevo usuario
+// Actualizar usuario
 // ========================================
+app.put('/:id', (req, res) => {
+    var id = req.params.id;
+    var body = req.body;
 
+    Usuario.findById(id, (err, usuario) => { // mongoose
+        if (err) {
+            return res.status(500).json({ // 500 porque si hay error es por el servidor porque o devueve usuario o null
+                ok: false,
+                mensaje: 'Error al buscar usuario en BBDD',
+                errors: err
+            });
+        }
+        if (!usuario) {
+            return res.status(400).json({
+                ok: false,
+                mensaje: 'El usuario con id ' + id + ' no existe',
+                errors: { message: 'No existe usario con este ID' }
+            });
+        }
+        usuario.nombre = body.nombre;
+        usuario.email = body.email;
+        usuario.role = body.role;
+        usuario.save((err, usuarioGuardado) => {
+            if (err) {
+                return res.status(400).json({
+                    ok: false,
+                    mensaje: 'Error al actualizar usuario en BBDD',
+                    errors: err
+                });
+            }
+            usuarioGuardado.password = ':)'; // esto es para no mostrar el password en el json pero no afecta a BBDD
+            res.status(200).json({
+                ok: true,
+                usuario: usuarioGuardado
+            });
+        });
+    });
+});
 module.exports = app; //con esto puedo usar este fichero en cualquier parte del server
