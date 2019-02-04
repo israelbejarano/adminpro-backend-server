@@ -56,7 +56,7 @@ app.post('/', (req, res) => {
 });
 
 // ========================================
-// Actualizar usuario
+// actualizar usuario
 // ========================================
 app.put('/:id', (req, res) => {
     var id = req.params.id;
@@ -94,6 +94,34 @@ app.put('/:id', (req, res) => {
                 usuario: usuarioGuardado
             });
         });
+    });
+});
+
+// ========================================
+// borrar usuario
+// ========================================
+app.delete('/:id', (req, res) => {
+    var id = req.params.id;
+    Usuario.findByIdAndRemove(id, (err, usuarioBorrado) => {
+        if (err) {
+            return res.status(500).json({
+                ok: false,
+                mensaje: 'Error borrando usuario en BBDD',
+                errors: err
+            });
+        }
+        if (!usuarioBorrado) {
+            return res.status(400).json({
+                ok: false,
+                mensaje: 'El usuario con id ' + id + ' no existe',
+                errors: { message: 'No existe usario con este ID' }
+            });
+        }
+        res.status(200).json({
+            ok: true,
+            usuario: usuarioBorrado
+        });
+
     });
 });
 module.exports = app; //con esto puedo usar este fichero en cualquier parte del server
