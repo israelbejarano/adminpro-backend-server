@@ -4,6 +4,46 @@ var Hospital = require('../models/hospital');
 var Medico = require('../models/medico');
 var Usuario = require('../models/usuario');
 
+// ========================================
+// busqueda por coleccion
+// siempre se muestra aun no teniendo token
+// ========================================
+app.get('/coleccion/:tabla/:busqueda', (req, res) => {
+    var busqueda = req.params.busqueda;
+    var tabla = req.params.tabla;
+    var regex = new RegExp(busqueda, 'i'); // creo una expresion regular para hacer el termino de busqueda insenible a mayus/minus
+    var promesa;
+
+    switch (tabla) {
+        case 'usuarios':
+            promesa = buscarUsuarios(busqueda, regex);
+            break;
+        case 'medicos':
+            promesa = buscarMedicos(busqueda, regex);
+            break;
+        case 'hospitales':
+            promesa = buscarHospitales(busqueda, regex);
+            break;
+        default:
+            return res.status(400).json({
+                ok: false,
+                mensaje: 'los tipos de busqueda solo son: usuarios, medicos, hospitales',
+                error: { message: 'tipo de tabla/coleccion no valido' }
+            });
+    }
+    promesa.then(data => {
+        res.status(200).json({
+            ok: true,
+            [tabla]: data
+        });
+    });
+
+});
+
+// ========================================
+// busqueda general
+// siempre se muestra aun no teniendo token
+// ========================================
 app.get('/todo/:busqueda', (req, res, next) => {
 
     var busqueda = req.params.busqueda;
