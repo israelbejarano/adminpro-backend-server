@@ -10,7 +10,12 @@ var Hospital = require('../models/hospital');
 // ========================================
 app.get('/', (req, res, next) => {
 
+    var desde = req.query.desde || 0;
+    desde = Number(desde);
+
     Hospital.find({})
+        .skip(desde) // para ir paginando
+        .limit(5) // paginacion de 5 elementos por paginas
         .populate('usuario', 'nombre email') // con esto obtengo el objeto usuario entero asociado a este find y solo muestro id, nombre y email
         .exec((err, hospitales) => {
             if (err) {
@@ -21,9 +26,19 @@ app.get('/', (req, res, next) => {
                 });
             }
 
-            res.status(200).json({
-                ok: true,
-                hospitales: hospitales //segun EM6 esto es redundante y se puede hacer solo hospitales, pero asi queda mas claro
+            Hospital.count({}, (err, total) => {
+                if (err) {
+                    return res.status(500).json({
+                        ok: false,
+                        mensaje: 'Error cargando hospital de BBDD',
+                        errors: err
+                    });
+                }
+                res.status(200).json({
+                    ok: true,
+                    hospitales: hospitales, //segun EM6 esto es redundante y se puede hacer solo hospitales, pero asi queda mas claro
+                    total: total
+                });
             });
         });
 });

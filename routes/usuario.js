@@ -17,7 +17,7 @@ app.get('/', (req, res, next) => {
 
     // Usuario.find({}, (err, usuarios) => {    // devuelve todo el objeto usuario sin mas
     Usuario.find({}, 'nombre email img role')
-        .skip(desde) // para ir paginando
+        .skip(desde) // para ir paginando se salta los desde usuarios
         .limit(5) // paginacion de 5 elementos por paginas
         .exec((err, usuarios) => {
             if (err) {
