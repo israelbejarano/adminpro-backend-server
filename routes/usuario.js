@@ -12,21 +12,36 @@ var Usuario = require('../models/usuario');
 // ========================================
 app.get('/', (req, res, next) => {
 
-    // Usuario.find({}, (err, usuarios) => {    // devuelve todo el objeto usuario sin mas
-    Usuario.find({}, 'nombre email img role').exec((err, usuarios) => {
-        if (err) {
-            return res.status(500).json({
-                ok: false,
-                mensaje: 'Error cargando usuario de BBDD',
-                errors: err
-            });
-        }
+    var desde = req.query.desde || 0;
+    desde = Number(desde);
 
-        res.status(200).json({
-            ok: true,
-            usuarios: usuarios //segun EM6 esto es redundante y se puede hacer solo usuarios, pero asi queda mas claro
+    // Usuario.find({}, (err, usuarios) => {    // devuelve todo el objeto usuario sin mas
+    Usuario.find({}, 'nombre email img role')
+        .skip(desde) // para ir paginando
+        .limit(5) // paginacion de 5 elementos por paginas
+        .exec((err, usuarios) => {
+            if (err) {
+                return res.status(500).json({
+                    ok: false,
+                    mensaje: 'Error cargando usuario de BBDD',
+                    errors: err
+                });
+            }
+            Usuario.count({}, (err, total) => {
+                if (err) {
+                    return res.status(500).json({
+                        ok: false,
+                        mensaje: 'Error contando usuarios de BBDD',
+                        errors: err
+                    });
+                }
+                res.status(200).json({
+                    ok: true,
+                    usuarios: usuarios, //segun EM6 esto es redundante y se puede hacer solo usuarios, pero asi queda mas claro
+                    total: total
+                });
+            });
         });
-    });
 });
 
 // ========================================
