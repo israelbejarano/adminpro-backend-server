@@ -10,20 +10,23 @@ var Medico = require('../models/medico');
 // ========================================
 app.get('/', (req, res, next) => {
 
-    Medico.find({}).exec((err, medicos) => {
-        if (err) {
-            return res.status(500).json({
-                ok: false,
-                mensaje: 'Error cargando medico de BBDD',
-                errors: err
-            });
-        }
+    Medico.find({})
+        .populate('usuario', 'nombre email') // con esto obtengo el objeto usuario entero asociado a este find y solo muestro id, nombre y email
+        .populate('hospital')
+        .exec((err, medicos) => {
+            if (err) {
+                return res.status(500).json({
+                    ok: false,
+                    mensaje: 'Error cargando medico de BBDD',
+                    errors: err
+                });
+            }
 
-        res.status(200).json({
-            ok: true,
-            medicos: medicos //segun EM6 esto es redundante y se puede hacer solo medicos, pero asi queda mas claro
+            res.status(200).json({
+                ok: true,
+                medicos: medicos //segun EM6 esto es redundante y se puede hacer solo medicos, pero asi queda mas claro
+            });
         });
-    });
 });
 
 // ========================================
