@@ -1,7 +1,7 @@
 var express = require('express');
 var bcrypt = require('bcryptjs');
 var jwt = require('jsonwebtoken');
-var SEED = require('../config/config').SEED;
+var mdAutenticacion = require('../middlewares/autenticacion');
 var app = express();
 
 var Usuario = require('../models/usuario');
@@ -30,30 +30,9 @@ app.get('/', (req, res, next) => {
 });
 
 // ========================================
-// Verificar token. Es un middleware
-// si no pasa la validacion del token el resto
-// de funciones no se ejecuta. Por tanto el
-// funcionamiento de este middleware es el correcto
-// ESTO NO ES OPTIMO TENERLO AQUI PERO FUNCIONA
-// ========================================
-app.use('/', (req, res, next) => {
-    var token = req.query.token;
-    jwt.verify(token, SEED, (err, decoded) => {
-        if (err) {
-            return res.status(401).json({
-                ok: false,
-                mensaje: 'invalid token',
-                errors: err
-            });
-        }
-        next(); // si pasa el filtro del token este next habilita el resto de funcionalidad de abajo
-    });
-});
-
-// ========================================
 // actualizar usuario
 // ========================================
-app.put('/:id', (req, res) => {
+app.put('/:id', mdAutenticacion.verificarToken, (req, res) => {
     var id = req.params.id;
     var body = req.body;
 
@@ -95,7 +74,7 @@ app.put('/:id', (req, res) => {
 // ========================================
 // crear un nuevo usuario
 // ========================================
-app.post('/', (req, res) => {
+app.post('/', mdAutenticacion.verificarToken, (req, res) => {
     var body = req.body;
     // declaro el usuario a guardar con los datos que trae el body que son los datos del usuario
     var usuario = new Usuario({
@@ -116,7 +95,8 @@ app.post('/', (req, res) => {
         }
         res.status(201).json({
             ok: true,
-            usuario: usuarioGuardado
+            usuario: usuarioGuardado,
+            usuarioToken: req.usuario
         });
     });
 });
@@ -124,7 +104,7 @@ app.post('/', (req, res) => {
 // ========================================
 // borrar usuario
 // ========================================
-app.delete('/:id', (req, res) => {
+app.delete('/:id', mdAutenticacion.verificarToken, (req, res) => {
     var id = req.params.id;
     Usuario.findByIdAndRemove(id, (err, usuarioBorrado) => {
         if (err) {
