@@ -34,7 +34,7 @@ app.get('/', (req, res, next) => {
 // si no pasa la validacion del token el resto
 // de funciones no se ejecuta. Por tanto el
 // funcionamiento de este middleware es el correcto
-// ESTO NO ES OPTIMO PERO FUNCIONA
+// ESTO NO ES OPTIMO TENERLO AQUI PERO FUNCIONA
 // ========================================
 app.use('/', (req, res, next) => {
     var token = req.query.token;
