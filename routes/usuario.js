@@ -1,11 +1,14 @@
 var express = require('express');
 var bcrypt = require('bcryptjs');
+var jwt = require('jsonwebtoken');
+var SEED = require('../config/config').SEED;
 var app = express();
 
 var Usuario = require('../models/usuario');
 
 // ========================================
-// obtener todos los usuarios
+// obtener todos los usuarios. El listado
+// siempre se muestra aun no teniendo token
 // ========================================
 app.get('/', (req, res, next) => {
 
@@ -27,31 +30,22 @@ app.get('/', (req, res, next) => {
 });
 
 // ========================================
-// crear un nuevo usuario
+// Verificar token. Es un middleware
+// si no pasa la validacion del token el resto
+// de funciones no se ejecuta. Por tanto el
+// funcionamiento de este middleware es el correcto
 // ========================================
-app.post('/', (req, res) => {
-    var body = req.body;
-    // declaro el usuario a guardar con los datos que trae el body que son los datos del usuario
-    var usuario = new Usuario({
-        nombre: body.nombre,
-        email: body.email,
-        password: bcrypt.hashSync(body.password, 10),
-        img: body.img,
-        role: body.role
-    });
-
-    usuario.save((err, usuarioGuardado) => { // moongose
+app.use('/', (req, res, next) => {
+    var token = req.query.token;
+    jwt.verify(token, SEED, (err, decoded) => {
         if (err) {
-            return res.status(400).json({
+            return res.status(401).json({
                 ok: false,
-                mensaje: 'Error guardando usuario en BBDD',
+                mensaje: 'invalid token',
                 errors: err
             });
         }
-        res.status(201).json({
-            ok: true,
-            usuario: usuarioGuardado
-        });
+        next(); // si pasa el filtro del token este next habilita el resto de funcionalidad de abajo
     });
 });
 
@@ -93,6 +87,35 @@ app.put('/:id', (req, res) => {
                 ok: true,
                 usuario: usuarioGuardado
             });
+        });
+    });
+});
+
+// ========================================
+// crear un nuevo usuario
+// ========================================
+app.post('/', (req, res) => {
+    var body = req.body;
+    // declaro el usuario a guardar con los datos que trae el body que son los datos del usuario
+    var usuario = new Usuario({
+        nombre: body.nombre,
+        email: body.email,
+        password: bcrypt.hashSync(body.password, 10),
+        img: body.img,
+        role: body.role
+    });
+
+    usuario.save((err, usuarioGuardado) => { // moongose
+        if (err) {
+            return res.status(400).json({
+                ok: false,
+                mensaje: 'Error guardando usuario en BBDD',
+                errors: err
+            });
+        }
+        res.status(201).json({
+            ok: true,
+            usuario: usuarioGuardado
         });
     });
 });
