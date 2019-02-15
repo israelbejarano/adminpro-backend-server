@@ -26,6 +26,12 @@ mongoose.connection.openUri('mongodb://localhost:27017/hospitalDB', (err, res) =
     console.log('BBDD en puerto 27017: \x1b[32m%s\x1b[0m', 'online');
 });
 
+// server index config poner http://localhost:3000/uploads/ en un navegador para ver el sistema de ficheros
+// descomentar para verlo en el navegador
+// var serveIndex = require('serve-index');
+// app.use(express.static(__dirname + '/'))
+// app.use('/uploads', serveIndex(__dirname + '/uploads'));
+
 // Rutas
 app.use('/usuario', usuarioRoutes);
 app.use('/login', loginRoutes);
