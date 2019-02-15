@@ -75,6 +75,13 @@ function subirPorTipo(tipo, id, nombreArchivo, res) {
                     errors: err
                 });
             }
+            if (!usuario) {
+                return res.status(400).json({
+                    ok: false,
+                    mensaje: 'No existe el usuario en BBDD',
+                    errors: { message: 'No existe el usuario en BBDD' }
+                });
+            }
             var pathViejo = './uploads/usuarios/' + usuario.img;
             // si existe el archivo lo borra
             if (fs.existsSync(pathViejo)) {
@@ -82,6 +89,7 @@ function subirPorTipo(tipo, id, nombreArchivo, res) {
             }
             usuario.img = nombreArchivo;
             usuario.save((err, usuarioActualizado) => {
+                usuarioActualizado.password = ':)';
                 return res.status(200).json({
                     ok: true,
                     mensaje: 'Imagen de usuario actualizada',
@@ -91,10 +99,66 @@ function subirPorTipo(tipo, id, nombreArchivo, res) {
         });
     }
     if (tipo === 'medicos') {
-
+        Medico.findById(id, (err, medico) => {
+            if (err) {
+                return res.status(500).json({
+                    ok: false,
+                    mensaje: 'Error cargando medico de BBDD',
+                    errors: err
+                });
+            }
+            if (!medico) {
+                return res.status(400).json({
+                    ok: false,
+                    mensaje: 'No existe el medico en BBDD',
+                    errors: { message: 'No existe el medico en BBDD' }
+                });
+            }
+            var pathViejo = './uploads/medicos/' + medico.img;
+            // si existe el archivo lo borra
+            if (fs.existsSync(pathViejo)) {
+                fs.unlinkSync(pathViejo);
+            }
+            medico.img = nombreArchivo;
+            medico.save((err, medicoActualizado) => {
+                return res.status(200).json({
+                    ok: true,
+                    mensaje: 'Imagen de medico actualizada',
+                    medico: medicoActualizado
+                });
+            });
+        });
     }
     if (tipo === 'hospitales') {
-
+        Hospital.findById(id, (err, hospital) => {
+            if (err) {
+                return res.status(500).json({
+                    ok: false,
+                    mensaje: 'Error cargando hospital de BBDD',
+                    errors: err
+                });
+            }
+            if (!hospital) {
+                return res.status(400).json({
+                    ok: false,
+                    mensaje: 'No existe el hospital en BBDD',
+                    errors: { message: 'No existe el hospital en BBDD' }
+                });
+            }
+            var pathViejo = './uploads/hospitales/' + hospital.img;
+            // si existe el archivo lo borra
+            if (fs.existsSync(pathViejo)) {
+                fs.unlinkSync(pathViejo);
+            }
+            hospital.img = nombreArchivo;
+            hospital.save((err, hospitalActualizado) => {
+                return res.status(200).json({
+                    ok: true,
+                    mensaje: 'Imagen de hospital actualizada',
+                    hospital: hospitalActualizado
+                });
+            });
+        });
     }
 }
 module.exports = app; //con esto puedo usar este fichero en cualquier parte del server
