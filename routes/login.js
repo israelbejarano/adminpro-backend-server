@@ -14,8 +14,8 @@ const GOOGLE_SECRET = require('../config/config').GOOGLE_SECRET;
 // ========================================
 // Autenticación mediante Google.
 // ========================================
-async function verify(token) {
-    const ticket = await client.verifyIdToken({
+async function verify(token) { // jshint ignore:line
+    const ticket = await client.verifyIdToken({ // jshint ignore:line
         idToken: token,
         audience: CLIENT_ID, // Specify the CLIENT_ID of the app that accesses the backend
         // Or, if multiple clients access the backend:
