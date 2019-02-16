@@ -89,7 +89,7 @@ app.put('/:id', mdAutenticacion.verificarToken, (req, res) => {
 // ========================================
 // crear un nuevo usuario
 // ========================================
-app.post('/', mdAutenticacion.verificarToken, (req, res) => {
+app.post('/', (req, res) => {
     var body = req.body;
     // declaro el usuario a guardar con los datos que trae el body que son los datos del usuario
     var usuario = new Usuario({
