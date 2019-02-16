@@ -1,4 +1,5 @@
 node_modules/
+google-signin-demo/node_modules/
 
 uploads/hospitales/*.png
 uploads/hospitales/*.jpg
