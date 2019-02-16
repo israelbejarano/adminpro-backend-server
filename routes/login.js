@@ -6,6 +6,61 @@ var app = express();
 
 var Usuario = require('../models/usuario');
 
+// Google vars
+const { OAuth2Client } = require('google-auth-library');
+const GOOGLE_CLIENT_ID = require('../config/config').GOOGLE_CLIENT_ID;
+const GOOGLE_SECRET = require('../config/config').GOOGLE_SECRET;
+
+// ========================================
+// Autenticación mediante Google.
+// ========================================
+async function verify(token) {
+    const ticket = await client.verifyIdToken({
+        idToken: token,
+        audience: CLIENT_ID, // Specify the CLIENT_ID of the app that accesses the backend
+        // Or, if multiple clients access the backend:
+        //[CLIENT_ID_1, CLIENT_ID_2, CLIENT_ID_3]
+    });
+    const payload = ticket.getPayload();
+    // const userid = payload['sub']; // no me hace falta, en le return mando todo lo que me interesa para este caso
+    // If request specified a G Suite domain:
+    //const domain = payload['hd'];
+    return {
+        nombre: payload.name,
+        email: payload.email,
+        img: payload.picture,
+        google: true
+    }
+}
+app.post('/google', (req, res) => {
+
+    var token = req.body.token;
+    const client = new OAuth2Client(GOOGLE_CLIENT_ID, GOOGLE_SECRET);
+    const ticket = client.verifyIdToken({
+        idToken: token,
+        audience: GOOGLE_CLIENT_ID
+    });
+    ticket.then(data => {
+        res.status(200).json({
+            ok: true,
+            mensaje: 'Google login ok.',
+            ticket: data.payload,
+            userid: data.payload.sub
+        });
+    }).catch(err => {
+        if (err) {
+            return res.status(403).json({
+                ok: false,
+                mensaje: 'Invalid Token',
+                errors: err
+            });
+        }
+    });
+});
+
+// ========================================
+// Autenticación normal.
+// ========================================
 app.post('/', (req, res) => {
     var body = req.body;
     Usuario.findOne({ email: body.email }, (err, usuarioBD) => {
