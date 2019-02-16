@@ -41,12 +41,67 @@ app.post('/google', (req, res) => {
         audience: GOOGLE_CLIENT_ID
     });
     ticket.then(data => {
-        res.status(200).json({
-            ok: true,
-            mensaje: 'Google login ok.',
-            ticket: data.payload,
-            userid: data.payload.sub
+        Usuario.findOne({ email: data.payload.email }, (err, usuarioDB) => {
+            if (err) {
+                return res.status(500).json({
+                    ok: false,
+                    mensaje: 'Error cargando usuario de BBDD',
+                    errors: err
+                });
+            }
+            if (usuarioDB) {
+                if (usuarioDB.google === false) {
+                    return res.status(400).json({
+                        ok: false,
+                        mensaje: 'Debe usar autenticación normal',
+                        errors: err
+                    });
+                } else {
+                    var token = jwt.sign({ usuario: usuarioDB }, SEED, { expiresIn: 14400 }); // 14400 son 4 horas
+
+                    res.status(200).json({
+                        ok: true,
+                        usuario: usuarioDB,
+                        token: token,
+                        id: usuarioDB._id
+                    });
+                }
+
+            } else {
+                // el usuario no existe hay que crearlo
+                var usuario = new Usuario();
+                usuario.nombre = data.payload.name;
+                usuario.email = data.payload.email;
+                usuario.img = data.payload.picture;
+                usuario.password = ':)';
+                usuario.google = true;
+
+                usuario.save((err, usuarioDB) => {
+                    if (err) {
+                        return res.status(500).json({
+                            ok: false,
+                            mensaje: 'Error guardando usuario de BBDD',
+                            errors: err
+                        });
+                    }
+                    var token = jwt.sign({ usuario: usuarioDB }, SEED, { expiresIn: 14400 }); // 14400 son 4 horas
+
+                    res.status(200).json({
+                        ok: true,
+                        usuario: usuarioDB,
+                        token: token,
+                        id: usuarioDB._id
+                    });
+                });
+
+            }
         });
+        // res.status(200).json({
+        //     ok: true,
+        //     mensaje: 'Google login ok.',
+        //     ticket: data.payload,
+        //     userid: data.payload.sub
+        // });
     }).catch(err => {
         if (err) {
             return res.status(403).json({
