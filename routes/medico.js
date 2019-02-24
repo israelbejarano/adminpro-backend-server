@@ -45,6 +45,34 @@ app.get('/', (req, res, next) => {
 });
 
 // ========================================
+// obtener un medico
+// ========================================
+app.get('/:id', (req, res) => {
+    var id = req.params.id;
+    Medico.findById(id).populate('usuario', 'nombre email img')
+        .populate('hospital').exec((err, medico) => {
+            if (err) {
+                return res.status(500).json({ // 500 porque si hay error es por el servidor porque o devueve medico o null
+                    ok: false,
+                    mensaje: 'Error al buscar usuario en BBDD',
+                    errors: err
+                });
+            }
+            if (!medico) {
+                return res.status(400).json({
+                    ok: false,
+                    mensaje: 'El medico con id ' + id + ' no existe',
+                    errors: { message: 'No existe medico con este ID' }
+                });
+            }
+            res.status(200).json({
+                ok: true,
+                medico: medico //segun EM6 esto es redundante y se puede hacer solo medicos, pero asi queda mas claro
+            });
+        });
+});
+
+// ========================================
 // actualizar medico
 // ========================================
 app.put('/:id', mdAutenticacion.verificarToken, (req, res) => {
