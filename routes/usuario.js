@@ -47,7 +47,7 @@ app.get('/', (req, res, next) => {
 // ========================================
 // actualizar usuario
 // ========================================
-app.put('/:id', mdAutenticacion.verificarToken, (req, res) => {
+app.put('/:id', [mdAutenticacion.verificarToken, mdAutenticacion.verificarAdminRole], (req, res) => {
     var id = req.params.id;
     var body = req.body;
 
@@ -119,7 +119,7 @@ app.post('/', (req, res) => {
 // ========================================
 // borrar usuario
 // ========================================
-app.delete('/:id', mdAutenticacion.verificarToken, (req, res) => {
+app.delete('/:id', [mdAutenticacion.verificarToken, mdAutenticacion.verificarAdminRole], (req, res) => {
     var id = req.params.id;
     Usuario.findByIdAndRemove(id, (err, usuarioBorrado) => {
         if (err) {
