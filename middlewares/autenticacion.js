@@ -26,21 +26,22 @@ exports.verificarToken = function(req, res, next) {
 }
 
 // ========================================
-// Verificar Admin. Es un middleware.
+// Verificar Admin o  mismo usuario. Es un middleware.
 // si no pasa la validacion del token el resto
 // de funciones no se ejecuta.
 // ========================================
-exports.verificarAdminRole = function(req, res, next) {
+exports.verificarAdminOrMismoUsuario = function(req, res, next) {
     var usuario = req.usuario;
+    var id = req.params.id;
 
-    if (usuario.role === 'ADMIN_ROLE') {
+    if (usuario.role === 'ADMIN_ROLE' || usuario._id === id) {
         next();
         return;
     } else {
         return res.status(401).json({
             ok: false,
-            mensaje: 'invalid token - no es usuario administrador',
-            errors: { message: 'No es usuario administrador' }
+            mensaje: 'invalid token - no es usuario administrador ni el mismo usuario',
+            errors: { message: 'No es usuario administrador ni el mismo usuario' }
         });
     }
 }
