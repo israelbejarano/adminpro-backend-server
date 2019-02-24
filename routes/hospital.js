@@ -5,8 +5,9 @@ var app = express();
 var Hospital = require('../models/hospital');
 
 // ========================================
-// obtener todos los hospitales. El listado
-// siempre se muestra aun no teniendo token
+// obtener todos los hospitales. paginados.
+// El listado siempre se muestra aun no 
+// teniendo token
 // ========================================
 app.get('/', (req, res, next) => {
 
@@ -16,6 +17,40 @@ app.get('/', (req, res, next) => {
     Hospital.find({})
         .skip(desde) // para ir paginando
         .limit(5) // paginacion de 5 elementos por paginas
+        .populate('usuario', 'nombre email') // con esto obtengo el objeto usuario entero asociado a este find y solo muestro id, nombre y email
+        .exec((err, hospitales) => {
+            if (err) {
+                return res.status(500).json({
+                    ok: false,
+                    mensaje: 'Error cargando hospital de BBDD',
+                    errors: err
+                });
+            }
+
+            Hospital.count({}, (err, total) => {
+                if (err) {
+                    return res.status(500).json({
+                        ok: false,
+                        mensaje: 'Error cargando hospital de BBDD',
+                        errors: err
+                    });
+                }
+                res.status(200).json({
+                    ok: true,
+                    hospitales: hospitales, //segun EM6 esto es redundante y se puede hacer solo hospitales, pero asi queda mas claro
+                    total: total
+                });
+            });
+        });
+});
+// ========================================
+// obtener todos los hospitales sin pagina.
+// El listado siempre se muestra aun no 
+// teniendo token
+// ========================================
+app.get('/todos', (req, res, next) => {
+
+    Hospital.find({})
         .populate('usuario', 'nombre email') // con esto obtengo el objeto usuario entero asociado a este find y solo muestro id, nombre y email
         .exec((err, hospitales) => {
             if (err) {
